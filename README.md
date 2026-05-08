@@ -2,12 +2,12 @@
   <h1 align="center">🔐 KoBackup Decryptor</h1>
   <p align="center">
     <strong>Decrypt Huawei HiSuite &amp; KoBackup encrypted backups</strong><br>
-    CLI + Modern GUI &bull; Selective Folder Decryption &bull; Password Verification
+    CLI + Modern GUI &bull; Selective Folder Decryption &bull; Drag & Drop &bull; Password Verification
   </p>
   <p align="center">
     <a href="#-installation"><img src="https://img.shields.io/badge/python-3.7%2B-blue?logo=python&logoColor=white" alt="Python 3.7+"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
-    <a href="#-changelog"><img src="https://img.shields.io/badge/version-20200705--GUI-purple" alt="Version"></a>
+    <a href="#-changelog"><img src="https://img.shields.io/badge/version-GUI_v1.1-purple" alt="Version"></a>
   </p>
 </p>
 
@@ -39,7 +39,11 @@ This fork adds a **full-featured graphical interface** built with tkinter, bring
 | Decrypt full backups | ✅ | ✅ |
 | Password verification before decrypt | — | ✅ |
 | **Selective folder decryption** | — | ✅ |
+| **Drag and Drop support** | — | ✅ |
+| **Settings persistence** | — | ✅ |
 | Pause / Resume / Stop controls | — | ✅ |
+| Export decryption logs | — | ✅ |
+| Open Output folder button | — | ✅ |
 | Real-time color-coded log output | — | ✅ |
 | Progress tracking with status updates | — | ✅ |
 | Responsive dark-themed interface | — | ✅ |
@@ -69,6 +73,7 @@ pip install -r requirements.txt
 | Package | Purpose |
 |---|---|
 | `pycryptodome` | AES / PBKDF2 / HMAC cryptographic operations |
+| `tkinterdnd2` | Drag and drop functionality for the GUI |
 | `tkinter` | GUI framework (bundled with Python on most platforms) |
 
 > **Note:** On some Linux distributions, tkinter may need to be installed separately:
@@ -95,11 +100,12 @@ python kobackupdec_gui.py
 #### GUI Workflow
 
 1. **Enter Password** — Type your backup password (toggle visibility with 👁)
-2. **Select Backup Folder** — Browse to the Huawei backup directory
+2. **Select Backup Folder** — Drag and drop your Huawei backup directory right into the application, or click **Browse**
 3. **Select Destination** — Choose where to save decrypted files (pick a parent, name the output folder)
 4. **Configure Options** — Toggle TAR expansion, writable permissions, and log verbosity
-5. **Select Folders** — After setting the backup path, click **🔍 Scan** or it auto-scans to show available folders. Check/uncheck individual folders (pictures, video, audios, etc.)
+5. **Select Folders** — After setting the backup path, check/uncheck individual folders (pictures, video, audios, etc.) to decrypt only what you need
 6. **Start Decryption** — Click **🔓 Start Decryption**
+7. **Open Output** — When finished, click **📂 Open Output** to view your files immediately
 
 #### GUI Controls
 
@@ -108,6 +114,8 @@ python kobackupdec_gui.py
 | 🔓 **Start Decryption** | Verifies password first, then begins decryption |
 | ⏸ **Pause / ▶ Resume** | Temporarily halt and resume the process |
 | ⏹ **Stop** | Cancel the decryption (partially decrypted files are kept) |
+| 📂 **Open Output** | Opens destination folder in Windows Explorer (enabled after success) |
+| **Export Log** | Save decryption logs to a text file for auditing |
 | **Select All / Deselect All** | Quickly toggle all folder checkboxes |
 | **🔍 Scan** | Re-scan backup directory for available folders |
 | **Clear Log** | Clear the log output panel |
@@ -116,7 +124,9 @@ python kobackupdec_gui.py
 
 - **🔑 Password Verification** — Validates the password against `info.xml` before starting decryption. Wrong passwords are caught instantly.
 - **📂 Selective Folder Decryption** — Only decrypt what you need (e.g., just pictures and contacts, skip video and apps).
-- **📊 Real-Time Progress** — Status bar shows current phase and folder being processed.
+- **💾 Settings Persistence** — The app remembers your selected folders and checkboxes across launches via `config.json`.
+- **🖱️ Drag and Drop** — Seamlessly drop backup folders into the app instead of browsing manually.
+- **📊 Real-Time Progress & Logs** — Status bar shows current phase. Export logs anytime.
 - **🎨 Dark Theme** — Modern, responsive dark interface with color-coded log levels (green=info, yellow=warning, red=error).
 - **📐 Responsive Layout** — Resizes gracefully from 600×500 to fullscreen. Folder checkboxes reflow automatically.
 

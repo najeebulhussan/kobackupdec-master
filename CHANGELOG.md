@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [GUI Edition] — 2026-05-08
+## [GUI_v1.1] — 2026-05-08
+
+### Added
+- **Drag-and-Drop:** Added `tkinterdnd2` support allowing users to drag backup folders directly into the application.
+- **Settings Persistence:** Created `config.json` integration to save and automatically load user preferences and selected directories across sessions.
+- **Log Exporting:** Added an "Export Log" button to save the current terminal output to a text file for auditing.
+- **Output Folder Quick Access:** Added an "Open Output" button that becomes clickable after a successful decryption to instantly view the extracted files.
+
+---
+
+## [GUI_v1.0] — 2026-05-08
 
 ### Added
 - **Full GUI application** (`kobackupdec_gui.py`) with modern dark theme

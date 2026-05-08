@@ -16,6 +16,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, simpledialog, ttk
 import queue
 import time
+import json
+import subprocess
+from tkinterdnd2 import TkinterDnD, DND_FILES
 
 # ---------------------------------------------------------------------------
 #  Logging handler that forwards records into a thread-safe queue
@@ -36,7 +39,7 @@ class QueueHandler(logging.Handler):
 #  Main GUI Application
 # ---------------------------------------------------------------------------
 
-class KoBackupDecGUI(tk.Tk):
+class KoBackupDecGUI(TkinterDnD.Tk):
     """Tkinter-based GUI for the Huawei KoBackup decryptor."""
 
     # -- Colour palette (dark mode) ----------------------------------------
@@ -111,6 +114,12 @@ class KoBackupDecGUI(tk.Tk):
 
         # Bind resize to reflow folder checkboxes
         self.bind("<Configure>", self._on_resize)
+
+        # Load saved settings
+        self._load_config()
+
+        # Save config on exit
+        self.protocol("WM_DELETE_WINDOW", self._on_closing)
 
         # Start polling the log queue
         self._poll_log_queue()
@@ -244,6 +253,10 @@ class KoBackupDecGUI(tk.Tk):
                          highlightthickness=1,
                          highlightcolor=self.ACCENT)
         entry.pack(side="left", fill="x", expand=True, ipady=7, padx=(0, 8))
+
+        # Enable Drag and Drop
+        entry.drop_target_register(DND_FILES)
+        entry.dnd_bind('<<Drop>>', lambda e, v=var, t=tag: self._on_drop(e, v, t))
 
         btn = tk.Button(row, text="Browse", font=("Segoe UI", 9, "bold"),
                         bg=self.ACCENT, fg="#ffffff",
@@ -516,6 +529,37 @@ class KoBackupDecGUI(tk.Tk):
             command=self._stop_decrypt
         )
         self.stop_btn.pack(side="left", padx=(10, 0))
+
+        self.open_output_btn = tk.Button(
+            btn_row,
+            text="📂 Open Output",
+            font=("Segoe UI", 9),
+            bg=self.SUCCESS,
+            fg="#1a1a2e",
+            activebackground="#10b981",
+            activeforeground="#1a1a2e",
+            relief="flat", bd=0,
+            cursor="hand2",
+            padx=14, pady=8,
+            state="disabled",
+            command=self._open_output_folder
+        )
+        self.open_output_btn.pack(side="right", padx=(10, 0))
+
+        self.export_log_btn = tk.Button(
+            btn_row,
+            text="Export Log",
+            font=("Segoe UI", 9),
+            bg=self.BG_INPUT,
+            fg=self.FG_DIM,
+            activebackground=self.BG_HOVER,
+            activeforeground=self.FG,
+            relief="flat", bd=0,
+            cursor="hand2",
+            padx=14, pady=8,
+            command=self._export_log
+        )
+        self.export_log_btn.pack(side="right", padx=(10, 0))
 
         self.clear_log_btn = tk.Button(
             btn_row,
@@ -919,12 +963,14 @@ class KoBackupDecGUI(tk.Tk):
         self._running = False
         self.progress.stop()
         self._set_controls_running(False)
+        self.open_output_btn.configure(state="disabled")
 
         if stopped:
             self.status_var.set('⏹  Decryption stopped by user')
             self._append_log('')
             self._append_log('WARNING: ⏹  Decryption was stopped by the user.')
         elif success:
+            self.open_output_btn.configure(state="normal")
             self.status_var.set('✅  Decryption completed successfully!')
             self._append_log('')
             self._append_log('=' * 50)
@@ -939,6 +985,87 @@ class KoBackupDecGUI(tk.Tk):
                                  'Decryption failed.\n'
                                  'Check the log output for details.')
 
+    # -----------------------------------------------------------------
+    #  New Utilities
+    # -----------------------------------------------------------------
+
+    def _on_drop(self, event, var, tag):
+        path = event.data
+        if path.startswith('{') and path.endswith('}'):
+            path = path[1:-1]
+        var.set(path)
+        if tag == "backup":
+            self._scan_backup_folders()
+
+    def _export_log(self):
+        log_content = self.log_text.get("1.0", "end-1c")
+        if not log_content.strip():
+            messagebox.showinfo("Export Log", "The log is empty.")
+            return
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            title="Save Log Output"
+        )
+        if filepath:
+            try:
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(log_content)
+                messagebox.showinfo("Success", "Log exported successfully.")
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to save log:\n{e}")
+
+    def _open_output_folder(self):
+        path = self.dest_var.get().strip()
+        if os.path.isdir(path):
+            if sys.platform == "win32":
+                os.startfile(path)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", path])
+            else:
+                subprocess.Popen(["xdg-open", path])
+
+    def _get_config_path(self):
+        return os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+    def _load_config(self):
+        config_path = self._get_config_path()
+        if os.path.exists(config_path):
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if "backup_path" in data:
+                        self.backup_var.set(data["backup_path"])
+                        self._scan_backup_folders()
+                    if "dest_path" in data:
+                        self.dest_var.set(data["dest_path"])
+                    if "expandtar" in data:
+                        self.expandtar_var.set(data["expandtar"])
+                    if "writable" in data:
+                        self.writable_var.set(data["writable"])
+                    if "verbose" in data:
+                        self.verbose_var.set(data["verbose"])
+            except Exception as e:
+                logging.error(f"Failed to load config: {e}")
+
+    def _save_config(self):
+        config_path = self._get_config_path()
+        data = {
+            "backup_path": self.backup_var.get(),
+            "dest_path": self.dest_var.get(),
+            "expandtar": self.expandtar_var.get(),
+            "writable": self.writable_var.get(),
+            "verbose": self.verbose_var.get()
+        }
+        try:
+            with open(config_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=4)
+        except Exception as e:
+            logging.error(f"Failed to save config: {e}")
+
+    def _on_closing(self):
+        self._save_config()
+        self.destroy()
 
 # ---------------------------------------------------------------------------
 #  Entry point
