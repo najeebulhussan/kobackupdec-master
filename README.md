@@ -9,6 +9,9 @@
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"></a>
     <a href="#-changelog"><img src="https://img.shields.io/badge/version-GUI_v1.2-purple" alt="Version"></a>
   </p>
+  <p align="center">
+    <h3>⬇️ <a href="https://github.com/najeebulhussan/kobackupdec-master/releases/latest">Download the Standalone Windows Executable (.exe)</a> ⬇️</h3>
+  </p>
 </p>
 
 ---
