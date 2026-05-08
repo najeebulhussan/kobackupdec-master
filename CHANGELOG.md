@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [GUI_v1.2] — 2026-05-08
+
+### Added
+- **Standalone Executable Compilation:** Added `build.py` script to seamlessly package the application into a `.exe` using PyInstaller.
+- **Custom Application Icon:** Generated and integrated a professional `.ico` icon into the executable bundle.
+
+---
+
 ## [GUI_v1.1] — 2026-05-08
 
 ### Added
