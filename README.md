@@ -13,6 +13,14 @@
 
 ---
 
+<p align="center">
+  <img src="screenshots/gui_main.png" alt="KoBackup Decryptor GUI" width="700">
+  <br>
+  <em>Modern dark-themed GUI with selective folder decryption, pause/stop controls, and real-time log output</em>
+</p>
+
+---
+
 ## 📖 Overview
 
 **KoBackup Decryptor** (`kobackupdec`) is a Python 3 tool for decrypting Huawei *HiSuite* and *KoBackup* (Android app) encrypted backups. It supports both **v9** and **v10** backup structures.
